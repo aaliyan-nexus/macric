@@ -30,11 +30,15 @@ jobs:
         with:
           gradle-version: '9.3.1'
 
-      - name: Restore debug keystore
+      - name: Restore or generate debug keystore
         run: |
           if [ -f "debug.keystore.base64" ] && [ ! -f "debug.keystore" ]; then
             base64 -d debug.keystore.base64 > debug.keystore
             echo "Decoded debug.keystore from debug.keystore.base64"
+          fi
+          if [ ! -f "debug.keystore" ]; then
+            keytool -genkeypair -v -keystore debug.keystore -alias androiddebugkey -keypass android -storepass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+            echo "Generated fresh debug.keystore automatically via keytool"
           fi
 
       - name: Ensure gradlew is executable
